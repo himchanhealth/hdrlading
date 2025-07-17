@@ -34,30 +34,6 @@ const ServicesSection = () => {
     }
   ];
 
-  const programs = [
-    {
-      title: "뇌졸중 · 치매 검진",
-      description: "뇌혈관 질환과 치매 조기 진단을 위한 종합 검사",
-      features: ["뇌 MRI", "뇌혈관 MRA", "인지기능 검사"],
-      price: "문의",
-      popular: false
-    },
-    {
-      title: "종합 암 검진",
-      description: "PET-CT를 활용한 전신 암 스크리닝 검사",
-      features: ["PET-CT", "종양표지자", "전문의 상담"],
-      price: "문의",
-      popular: true
-    },
-    {
-      title: "심혈관 정밀 검진",
-      description: "심장 및 혈관 질환 정밀 진단 프로그램",
-      features: ["심장 CT", "관상동맥 조영술", "심초음파"],
-      price: "문의",
-      popular: false
-    }
-  ];
-
   return (
     <section id="services" className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-6">
@@ -114,67 +90,8 @@ const ServicesSection = () => {
           </div>
         </div>
 
-        {/* 맞춤 검진 프로그램 */}
-        <div>
-          <div className="text-center mb-16">
-            <h2 className="font-korean text-3xl md:text-4xl font-bold text-primary mb-4">
-              맞춤 검진 프로그램
-            </h2>
-            <p className="font-korean text-lg text-gray-600">
-              개인의 건강 상태와 위험 요인에 맞춘 전문 검진 프로그램
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {programs.map((program, index) => (
-              <Card key={index} className={`relative overflow-hidden ${program.popular ? 'border-2 border-accent shadow-xl' : 'border shadow-lg'} hover:shadow-xl transition-all duration-300`}>
-                {program.popular && (
-                  <div className="absolute top-0 right-0 bg-accent text-white px-4 py-1 text-sm font-korean font-medium">
-                    인기
-                  </div>
-                )}
-                
-                <CardContent className="p-8">
-                  <h3 className="font-korean text-xl font-bold text-primary mb-3">
-                    {program.title}
-                  </h3>
-                  
-                  <p className="font-korean text-gray-600 mb-6">
-                    {program.description}
-                  </p>
-                  
-                  <div className="mb-6">
-                    <h4 className="font-korean font-semibold text-primary mb-3">포함 검사</h4>
-                    <ul className="space-y-2">
-                      {program.features.map((feature, idx) => (
-                        <li key={idx} className="flex items-center font-korean text-sm text-gray-600">
-                          <CheckCircle className="w-4 h-4 text-accent mr-2 flex-shrink-0" />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  
-                  <div className="border-t pt-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="font-korean text-gray-600">검진비용</span>
-                      <span className="font-korean font-bold text-lg text-primary">{program.price}</span>
-                    </div>
-                    
-                    <Button 
-                      className={`w-full font-korean ${program.popular ? 'bg-accent hover:bg-accent/90' : ''}`}
-                      variant={program.popular ? 'default' : 'outline'}
-                    >
-                      상담 신청하기
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {/* 예약 안내 */}
-          <div className="mt-16 bg-gray-50 rounded-2xl p-8 text-center">
+        {/* 예약 안내 */}
+        <div className="mt-16 bg-gray-50 rounded-2xl p-8 text-center">
             <h3 className="font-korean text-2xl font-bold text-primary mb-4">
               24시간 온라인 예약 가능
             </h3>
@@ -190,7 +107,6 @@ const ServicesSection = () => {
               </Button>
             </div>
           </div>
-        </div>
       </div>
     </section>
   );
