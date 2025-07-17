@@ -20,7 +20,7 @@ const HeroSection = () => {
         </div>
 
         <h1 className="font-korean text-4xl md:text-6xl font-bold mb-6 leading-tight">
-          영상의학과<br />
+          현대영상의학과<br />
           <span className="text-accent">정확한 진단의 새로운 기준</span>
         </h1>
         
