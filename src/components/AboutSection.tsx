@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Award, Users, Star, Quote } from "lucide-react";
+import { Award, Users, Star } from "lucide-react";
 
 const AboutSection = () => {
   const doctors = [
@@ -21,26 +21,6 @@ const AboutSection = () => {
     }
   ];
 
-  const testimonials = [
-    {
-      name: "김○○",
-      age: "45세",
-      content: "AI 영상판독 시스템 덕분에 빠르고 정확한 진단을 받을 수 있었습니다. 전문의 선생님의 자세한 설명도 매우 만족스러웠습니다.",
-      rating: 5
-    },
-    {
-      name: "박○○",
-      age: "52세", 
-      content: "최신 장비와 쾌적한 환경에서 검사받을 수 있어 좋았습니다. 대기시간도 짧고 직원분들이 친절해서 편안했습니다.",
-      rating: 5
-    },
-    {
-      name: "정○○",
-      age: "38세",
-      content: "PET-CT 검사를 받았는데 당일 결과를 받을 수 있어서 불안감이 많이 줄었습니다. 정확한 진단에 감사드립니다.",
-      rating: 5
-    }
-  ];
 
   const achievements = [
     {
@@ -170,39 +150,6 @@ const AboutSection = () => {
           </div>
         </div>
 
-        {/* 고객 후기 */}
-        <div>
-          <h3 className="font-korean text-2xl font-bold text-primary text-center mb-12">
-            환자 후기
-          </h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <Card key={index} className="shadow-lg hover:shadow-xl transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-center mb-4">
-                    <Quote className="w-6 h-6 text-accent mr-2" />
-                    <div className="flex">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <p className="font-korean text-gray-700 mb-4 leading-relaxed">
-                    "{testimonial.content}"
-                  </p>
-                  
-                  <div className="border-t pt-4">
-                    <p className="font-korean font-medium text-primary">
-                      {testimonial.name} ({testimonial.age})
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
       </div>
     </section>
   );
