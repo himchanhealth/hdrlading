@@ -1,0 +1,48 @@
+{
+  "name": "hyundai-radiology-landing",
+  "version": 2,
+  "framework": "vite",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "installCommand": "npm install",
+  "devCommand": "npm run dev",
+  "env": {
+    "VITE_SUPABASE_URL": "@supabase_url",
+    "VITE_SUPABASE_ANON_KEY": "@supabase_anon_key",
+    "VITE_EMAILJS_SERVICE_ID": "@emailjs_service_id",
+    "VITE_EMAILJS_TEMPLATE_ID": "@emailjs_template_id",
+    "VITE_EMAILJS_PUBLIC_KEY": "@emailjs_public_key",
+    "VITE_SMS_SERVICE_ID": "@sms_service_id",
+    "VITE_SMS_TEMPLATE_ID": "@sms_template_id",
+    "VITE_SMS_USER_ID": "@sms_user_id"
+  },
+  "build": {
+    "env": {
+      "VITE_SUPABASE_URL": "@supabase_url",
+      "VITE_SUPABASE_ANON_KEY": "@supabase_anon_key",
+      "VITE_EMAILJS_SERVICE_ID": "@emailjs_service_id",
+      "VITE_EMAILJS_TEMPLATE_ID": "@emailjs_template_id",
+      "VITE_EMAILJS_PUBLIC_KEY": "@emailjs_public_key",
+      "VITE_SMS_SERVICE_ID": "@sms_service_id",
+      "VITE_SMS_TEMPLATE_ID": "@sms_template_id",
+      "VITE_SMS_USER_ID": "@sms_user_id"
+    }
+  },
+  "functions": {
+    "app/**/*.js": {
+      "runtime": "@vercel/node"
+    }
+  },
+  "redirects": [
+    {
+      "source": "/admin/login",
+      "destination": "/admin/login"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
