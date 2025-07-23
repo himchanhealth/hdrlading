@@ -35,8 +35,8 @@ Vercel 대시보드 > 프로젝트 > Settings > Environment Variables에서 다�
 
 ### 필수 환경 변수
 ```
-VITE_SUPABASE_URL=your_supabase_project_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_SUPABASE_URL=https://gttwyjidrqjopxmxfphz.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd0dHd5amlkcnFqb3B4bXhmcGh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwODc2OTgsImV4cCI6MjA2ODY2MzY5OH0.zcUJ1Me9q3k08t7Zv27NL1WRsajDtjFsC75hvtvQQLs
 ```
 
 ### 선택적 환경 변수 (기능 사용 시 필요)

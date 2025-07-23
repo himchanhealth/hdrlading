@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Supabase 설정
-const supabaseUrl = import.meta.env.SUPABASE_URL || 'https://gttwyjidrqjopxmxfphz.supabase.co';
-const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd0dHd5amlkcnFqb3B4bXhmcGh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwODc2OTgsImV4cCI6MjA2ODY2MzY5OH0.zcUJ1Me9q3k08t7Zv27NL1WRsajDtjFsC75hvtvQQLs';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://gttwyjidrqjopxmxfphz.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd0dHd5amlkcnFqb3B4bXhmcGh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwODc2OTgsImV4cCI6MjA2ODY2MzY5OH0.zcUJ1Me9q3k08t7Zv27NL1WRsajDtjFsC75hvtvQQLs';
 
 // Supabase 클라이언트 생성
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
