@@ -31,19 +31,6 @@ function CustomCaption({ displayMonth, onMonthChange }: { displayMonth: Date; on
 
   return (
     <div className="flex justify-center items-center gap-2 py-2">
-      <Select value={displayMonth.getMonth().toString()} onValueChange={handleMonthChange}>
-        <SelectTrigger className="w-auto h-8 px-2 text-sm font-medium border-none shadow-none hover:bg-accent">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {months.map((month, index) => (
-            <SelectItem key={index} value={index.toString()}>
-              {month}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      
       <Select value={displayMonth.getFullYear().toString()} onValueChange={handleYearChange}>
         <SelectTrigger className="w-auto h-8 px-2 text-sm font-medium border-none shadow-none hover:bg-accent">
           <SelectValue />
@@ -52,6 +39,19 @@ function CustomCaption({ displayMonth, onMonthChange }: { displayMonth: Date; on
           {years.map((year) => (
             <SelectItem key={year} value={year.toString()}>
               {year}년
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      
+      <Select value={displayMonth.getMonth().toString()} onValueChange={handleMonthChange}>
+        <SelectTrigger className="w-auto h-8 px-2 text-sm font-medium border-none shadow-none hover:bg-accent">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {months.map((month, index) => (
+            <SelectItem key={index} value={index.toString()}>
+              {month}
             </SelectItem>
           ))}
         </SelectContent>
