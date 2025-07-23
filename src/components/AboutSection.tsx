@@ -1,25 +1,9 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Award, Users, Star } from "lucide-react";
+import MedicalStaffSection from "./MedicalStaffSection";
+import BoardSection from "./BoardSection";
 
 const AboutSection = () => {
-  const doctors = [
-    {
-      name: "김현대",
-      position: "원장",
-      specialty: "영상의학과 전문의",
-      experience: "15년",
-      education: "서울대학교 의과대학",
-      philosophy: "정확한 진단을 통해 환자의 건강한 삶을 지원합니다"
-    },
-    {
-      name: "이영상",
-      position: "과장",
-      specialty: "신경영상 전문",
-      experience: "12년",
-      education: "연세대학교 의과대학",
-      philosophy: "첨단 기술과 따뜻한 마음으로 진료합니다"
-    }
-  ];
 
 
   const achievements = [
@@ -52,50 +36,18 @@ const AboutSection = () => {
           </p>
         </div>
 
-        {/* 의료진 소개 */}
+        {/* 의료진 소개와 병원 소식 섹션 */}
         <div className="mb-20">
-          <h3 className="font-korean text-2xl font-bold text-primary text-center mb-12">
-            전문 의료진
-          </h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {doctors.map((doctor, index) => (
-              <Card key={index} className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
-                <CardContent className="p-0">
-                  {/* 의사 이미지 플레이스홀더 */}
-                  <div className="h-48 bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
-                    <div className="w-24 h-24 bg-primary/20 rounded-full flex items-center justify-center">
-                      <Users className="w-12 h-12 text-primary" />
-                    </div>
-                  </div>
-                  
-                  <div className="p-6">
-                    <div className="mb-4">
-                      <h4 className="font-korean text-xl font-bold text-primary">{doctor.name}</h4>
-                      <p className="font-korean text-accent font-medium">{doctor.position}</p>
-                    </div>
-                    
-                    <div className="space-y-2 mb-4">
-                      <p className="font-korean text-sm text-gray-600">
-                        <span className="font-medium">전문분야:</span> {doctor.specialty}
-                      </p>
-                      <p className="font-korean text-sm text-gray-600">
-                        <span className="font-medium">경력:</span> {doctor.experience}
-                      </p>
-                      <p className="font-korean text-sm text-gray-600">
-                        <span className="font-medium">학력:</span> {doctor.education}
-                      </p>
-                    </div>
-                    
-                    <div className="border-t pt-4">
-                      <p className="font-korean text-sm text-gray-700 italic">
-                        "{doctor.philosophy}"
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+            {/* 좌측: 의료진 소개 */}
+            <div className="h-full">
+              <MedicalStaffSection />
+            </div>
+            
+            {/* 우측: 병원 소식 게시판 */}
+            <div className="h-full">
+              <BoardSection />
+            </div>
           </div>
         </div>
 

@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Phone, MessageCircle, Calendar } from "lucide-react";
+import QuickReservationModal from "./QuickReservationModal";
 
 const CTASection = () => {
   return (
@@ -18,10 +19,10 @@ const CTASection = () => {
           <Button 
             size="lg" 
             className="font-korean bg-white text-primary hover:bg-gray-100 py-6 group transition-all duration-300"
+            onClick={() => window.open('tel:063-272-3323', '_self')}
           >
             <Phone className="w-5 h-5 mr-2 group-hover:animate-pulse" />
             전화 상담
-            <div className="text-sm mt-1 opacity-70">063-250-2800</div>
           </Button>
           
           <Button 
@@ -29,18 +30,18 @@ const CTASection = () => {
             className="font-korean bg-accent hover:bg-accent/90 text-white py-6 group transition-all duration-300"
           >
             <MessageCircle className="w-5 h-5 mr-2 group-hover:animate-pulse" />
-            카카오톡 상담
-            <div className="text-sm mt-1 opacity-70">@현대영상의학과</div>
+            문의하기
           </Button>
           
-          <Button 
-            size="lg" 
-            className="font-korean bg-white/10 border border-white/20 hover:bg-white/20 text-white py-6 group transition-all duration-300"
-          >
-            <Calendar className="w-5 h-5 mr-2 group-hover:animate-pulse" />
-            온라인 예약
-            <div className="text-sm mt-1 opacity-70">즉시 예약</div>
-          </Button>
+          <QuickReservationModal>
+            <Button 
+              size="lg" 
+              className="font-korean bg-white/10 border border-white/20 hover:bg-white/20 text-white py-6 group transition-all duration-300"
+            >
+              <Calendar className="w-5 h-5 mr-2 group-hover:animate-pulse" />
+              온라인 예약
+            </Button>
+          </QuickReservationModal>
         </div>
       </div>
     </section>

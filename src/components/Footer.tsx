@@ -6,13 +6,13 @@ const Footer = () => {
           {/* Hospital Info */}
           <div>
             <h3 className="font-korean text-xl font-bold mb-4">
-              현대영상의학과의원 건강검진센터
+              현대영상의학과의원
             </h3>
             <div className="font-korean space-y-2 text-gray-300">
-              <p>대표자: 김현대</p>
-              <p>사업자번호: 123-45-67890</p>
+              <p>대표자: 문무창</p>
+              <p>사업자번호: 418-96-00878</p>
               <p>주소: 전북 전주시 덕진구 백제대로 631</p>
-              <p>전화: 063-250-2800</p>
+              <p>전화: 063-272-3323</p>
             </div>
           </div>
           
@@ -41,11 +41,19 @@ const Footer = () => {
         
         <div className="border-t border-gray-600 mt-8 pt-8 text-center">
           <p className="font-korean text-gray-400">
-            © 2024 현대영상의학과의원 건강검진센터. All rights reserved.
+            © 2024 현대영상의학과의원. All rights reserved.
           </p>
           <p className="font-korean text-sm text-gray-500 mt-2">
             정확한 진단, 신뢰할 수 있는 건강검진 파트너
           </p>
+          <div className="mt-4">
+            <a 
+              href="/admin/login" 
+              className="text-xs text-gray-600 hover:text-gray-400 transition-colors"
+            >
+              관리자 로그인
+            </a>
+          </div>
         </div>
       </div>
     </footer>

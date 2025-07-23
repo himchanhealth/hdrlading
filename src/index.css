@@ -108,4 +108,30 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground font-korean;
   }
+
+  /* Hide native date picker icons */
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    display: none !important;
+    -webkit-appearance: none !important;
+  }
+
+  input[type="date"]::-webkit-inner-spin-button,
+  input[type="date"]::-webkit-outer-spin-button {
+    display: none !important;
+    -webkit-appearance: none !important;
+  }
+
+  /* Firefox date picker icon hiding */
+  input[type="date"] {
+    -moz-appearance: textfield !important;
+  }
+
+  /* IE/Edge date picker icon hiding */
+  input[type="date"]::-ms-clear {
+    display: none !important;
+  }
+
+  input[type="date"]::-ms-reveal {
+    display: none !important;
+  }
 }

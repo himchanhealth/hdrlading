@@ -21,8 +21,8 @@ const ServicesSection = () => {
     {
       step: "03",
       icon: FileText,
-      title: "AI 판독 및 분석",
-      description: "AI 시스템과 전문의 협진 판독",
+      title: "전문의 판독",
+      description: "40년 경력 영상의학과 전문의 정밀 판독",
       time: "30분-2시간"
     },
     {
@@ -89,24 +89,6 @@ const ServicesSection = () => {
             })}
           </div>
         </div>
-
-        {/* 예약 안내 */}
-        <div className="mt-16 bg-gray-50 rounded-2xl p-8 text-center">
-            <h3 className="font-korean text-2xl font-bold text-primary mb-4">
-              24시간 온라인 예약 가능
-            </h3>
-            <p className="font-korean text-gray-600 mb-6">
-              전화 상담 및 온라인으로 편리하게 예약하실 수 있습니다
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
-              <Button size="lg" className="font-korean bg-primary hover:bg-primary/90 flex-1">
-                온라인 예약
-              </Button>
-              <Button variant="outline" size="lg" className="font-korean flex-1">
-                전화 예약: 063-250-2800
-              </Button>
-            </div>
-          </div>
       </div>
     </section>
   );

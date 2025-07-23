@@ -1,31 +1,27 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Brain, Scan, Activity, Zap } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 const EquipmentSection = () => {
   const equipment = [
     {
-      icon: Brain,
       name: "MRI",
       title: "자기공명영상",
       features: ["고해상도 영상", "무방사선", "연조직 진단"],
-      description: "뇌, 척추, 관절 등의 정밀 진단",
-      color: "bg-blue-500"
+      description: "뇌, 척추, 관절 등을 고해상도로 정밀하게 진단합니다. 정밀검사나 만성질환 모니터링에 적합하며, 방사선 노출이 없어 안전한 진단이 가능합니다.",
+      image: "https://cdn.imweb.me/upload/S202505065183c8257f7bc/bc3a6931727e5.png"
     },
     {
-      icon: Scan,
       name: "CT",
       title: "컴퓨터단층촬영",
-      features: ["3D 영상구현", "빠른 촬영", "정확한 진단"],
-      description: "흉부, 복부, 뇌혈관 등 전신 검사",
-      color: "bg-green-500"
+      features: ["3D 영상 구현", "빠른 촬영", "정확한 진단"],
+      description: "고속 회전 기술로 짧은 시간 내에 정밀한 3D 영상을 구현하여 흉부, 복부, 뇌혈관 등 전신 주요 부위의 이상 유무를 정확하게 진단합니다.",
+      image: "https://cdn.imweb.me/upload/S202505065183c8257f7bc/6a3db8346ecf0.png"
     },
     {
-      icon: Activity,
       name: "PET-CT",
       title: "양전자방출단층촬영",
       features: ["암 조기발견", "대사질환 진단", "전신 스캔"],
-      description: "종양, 치매, 심장질환 정밀 진단",
-      color: "bg-purple-500"
+      description: "세포의 대사활동을 실시간으로 확인하여 종양, 치매, 심장질환 등 조기 진단이 중요한 질환의 기능적 변화를 정밀하게 파악합니다.",
+      image: "https://cdn.imweb.me/upload/S202505065183c8257f7bc/f6b8665a0e684.png"
     }
   ];
 
@@ -37,85 +33,50 @@ const EquipmentSection = () => {
             첨단 검사 장비
           </h2>
           <p className="font-korean text-lg text-gray-600 max-w-2xl mx-auto">
-            대학병원급 최첨단 장비로 정확하고 안전한 검사를 제공합니다
+            대학병원급 최신 장비를 통해 정밀하고 안전한 검사를 제공합니다.
           </p>
         </div>
 
-        {/* 장비 카드들 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-          {equipment.map((item, index) => {
-            const IconComponent = item.icon;
-            return (
-              <Card key={index} className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg hover:-translate-y-2">
-                <CardContent className="p-8 text-center">
-                  <div className={`w-16 h-16 ${item.color} rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                    <IconComponent className="w-8 h-8 text-white" />
-                  </div>
-                  
-                  <div className="mb-4">
-                    <h3 className="font-korean text-2xl font-bold text-primary mb-1">{item.name}</h3>
-                    <p className="font-korean text-sm text-gray-600">{item.title}</p>
-                  </div>
+        {/* 장비 목록 */}
+        <div className="space-y-12">
+          {equipment.map((item, index) => (
+            <div key={index} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
+                {/* 이미지 영역 */}
+                <div className="relative h-80 lg:h-96">
+                  <img 
+                    src={item.image} 
+                    alt={`${item.name} 장비`}
+                    className="w-full h-full object-contain"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                </div>
 
+                {/* 내용 영역 */}
+                <div className="p-8 lg:px-20 lg:py-16 flex flex-col justify-center">
                   <div className="mb-6">
-                    <div className="flex flex-wrap justify-center gap-2 mb-4">
+                    <h3 className="font-korean text-2xl lg:text-3xl font-bold text-primary mb-2">
+                      {item.name} ({item.title})
+                    </h3>
+                    
+                    {/* 포인트 태그 */}
+                    <div className="flex flex-wrap gap-2 mb-4">
                       {item.features.map((feature, idx) => (
-                        <span key={idx} className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-korean">
+                        <Badge key={idx} variant="secondary" className="font-korean text-sm">
                           {feature}
-                        </span>
+                        </Badge>
                       ))}
                     </div>
-                    <p className="font-korean text-gray-600">{item.description}</p>
+                    
+                    {/* 설명 */}
+                    <p className="font-korean text-gray-700 text-lg leading-relaxed">
+                      {item.description}
+                    </p>
                   </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-
-        {/* AI 영상판독 하이라이트 */}
-        <div className="bg-gradient-to-r from-accent/10 to-primary/10 rounded-2xl p-8 md:p-12 border border-accent/20">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center bg-accent/20 rounded-full px-6 py-3 mb-6">
-              <Zap className="w-6 h-6 text-accent mr-3" />
-              <span className="font-korean text-accent font-bold text-lg">AI 영상판독 시스템</span>
-            </div>
-            
-            <h3 className="font-korean text-2xl md:text-3xl font-bold text-primary mb-4">
-              인공지능이 함께하는 정확한 진단
-            </h3>
-            
-            <p className="font-korean text-lg text-gray-700 mb-8 leading-relaxed">
-              최첨단 AI 기술과 전문의의 경험이 결합되어<br />
-              더욱 정확하고 빠른 영상 판독을 제공합니다
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-white/80 rounded-lg p-6 backdrop-blur-sm">
-                <div className="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Zap className="w-6 h-6 text-accent" />
                 </div>
-                <h4 className="font-korean font-semibold text-primary mb-2">빠른 분석</h4>
-                <p className="font-korean text-sm text-gray-600">AI가 영상을 즉시 분석하여 판독 시간을 단축</p>
-              </div>
-              
-              <div className="bg-white/80 rounded-lg p-6 backdrop-blur-sm">
-                <div className="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Brain className="w-6 h-6 text-accent" />
-                </div>
-                <h4 className="font-korean font-semibold text-primary mb-2">정확한 진단</h4>
-                <p className="font-korean text-sm text-gray-600">딥러닝 기술로 미세한 병변까지 정확히 감지</p>
-              </div>
-              
-              <div className="bg-white/80 rounded-lg p-6 backdrop-blur-sm">
-                <div className="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Activity className="w-6 h-6 text-accent" />
-                </div>
-                <h4 className="font-korean font-semibold text-primary mb-2">전문의 검증</h4>
-                <p className="font-korean text-sm text-gray-600">AI 분석 결과를 전문의가 최종 검증하여 신뢰성 확보</p>
               </div>
             </div>
-          </div>
+          ))}
         </div>
       </div>
     </section>

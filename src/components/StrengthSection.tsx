@@ -14,7 +14,7 @@ const StrengthSection = () => {
     {
       icon: Award,
       title: "영상의학과 전문의 직접 판독",
-      description: "풍부한 경험의 전문의가 직접 판독합니다",
+      description: "40년 경력 영상의학과 전문의가 직접 판독합니다",
       image: ctImage,
     },
     {
