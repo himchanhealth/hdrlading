@@ -11,7 +11,7 @@ import {
   Phone,
   FileText
 } from 'lucide-react';
-import { getReservations, ReservationData } from '@/lib/supabase';
+import { getReservations, subscribeToReservations, ReservationData } from '@/lib/supabase';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, addMonths, subMonths, isToday } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import PatientDetailModal from './PatientDetailModal';
@@ -35,9 +35,19 @@ const CalendarView: React.FC<CalendarViewProps> = ({ className }) => {
     patientPhone: ''
   });
 
-  // 예약 데이터 로드
+  // 실시간 예약 데이터 구독
   useEffect(() => {
-    loadReservations();
+    console.log('📅 캘린더 실시간 예약 구독 시작...');
+    const unsubscribe = subscribeToReservations((data) => {
+      console.log('📅 캘린더 실시간 예약 데이터 업데이트:', data.length, '개');
+      setReservations(data);
+      setLoading(false);
+    });
+    
+    return () => {
+      console.log('📅 캘린더 실시간 예약 구독 해제...');
+      unsubscribe();
+    };
   }, []);
 
   const loadReservations = async () => {

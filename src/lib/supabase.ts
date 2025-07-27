@@ -58,11 +58,21 @@ export const saveReservation = async (data: Omit<ReservationData, 'id' | 'create
   try {
     console.log('Supabase에 예약 데이터 저장 중...', data);
 
+    // 빈 문자열을 null로 변환
+    const processedData = {
+      ...data,
+      patient_birth_date: data.patient_birth_date || null,
+      patient_gender: data.patient_gender || null,
+      preferred_date: data.preferred_date || null,
+      preferred_time: data.preferred_time || null,
+      notes: data.notes || null
+    };
+
     const { data: reservation, error } = await supabase
       .from('reservations')
       .insert([
         {
-          ...data,
+          ...processedData,
           status: 'pending',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
@@ -77,6 +87,13 @@ export const saveReservation = async (data: Omit<ReservationData, 'id' | 'create
     }
 
     console.log('Supabase 저장 성공:', reservation);
+    
+    // 관리자 페이지에 새 예약 알림 이벤트 발생
+    window.dispatchEvent(new CustomEvent('newReservation', { 
+      detail: reservation 
+    }));
+    console.log('🔥 새 예약 이벤트 발생:', reservation.patient_name);
+    
     return { success: true, data: reservation };
   } catch (error) {
     console.error('예약 저장 중 오류:', error);
@@ -104,6 +121,71 @@ export const getReservations = async (): Promise<ReservationData[]> => {
   }
 };
 
+// 간단한 폴링 방식 실시간 예약 데이터 구독 함수
+export const subscribeToReservations = (callback: (reservations: ReservationData[]) => void) => {
+  console.log('⚡ 폴링 방식 예약 구독 시작...');
+  
+  // 초기 데이터 로드
+  getReservations().then((data) => {
+    console.log('⚡ 초기 예약 데이터 로드:', data.length, '개');
+    callback(data);
+  });
+  
+  // 60초마다 데이터를 다시 가져오는 폴링 방식
+  const intervalId = setInterval(() => {
+    console.log('⚡ 예약 데이터 폴링 중...');
+    getReservations().then((data) => {
+      console.log('⚡ 폴링으로 예약 데이터 업데이트:', data.length, '개');
+      callback(data);
+    });
+  }, 60000); // 60초마다
+  
+  // 구독 해제 함수 반환
+  return () => {
+    console.log('⚡ 예약 폴링 해제...');
+    clearInterval(intervalId);
+  };
+};
+
+// Realtime 방식 실시간 예약 데이터 구독 함수 (백업용)
+export const subscribeToReservationsRealtime = (callback: (reservations: ReservationData[]) => void) => {
+  console.log('🟡 Realtime 예약 구독 시작...');
+  
+  // 초기 데이터 로드
+  getReservations().then(callback);
+  
+  // 실시간 구독 설정
+  const subscription = supabase
+    .channel('reservations_changes')
+    .on(
+      'postgres_changes',
+      {
+        event: '*', // INSERT, UPDATE, DELETE 모든 변경사항
+        schema: 'public',
+        table: 'reservations'
+      },
+      (payload) => {
+        console.log('🟡 예약 데이터 변경 감지:', payload);
+        // 변경사항 발생 시 전체 데이터 다시 조회
+        getReservations().then(callback);
+      }
+    )
+    .subscribe((status) => {
+      console.log('🟡 예약 구독 상태:', status);
+      if (status === 'SUBSCRIBED') {
+        console.log('🟡 Realtime 구독 성공!');
+      } else if (status === 'CHANNEL_ERROR') {
+        console.log('🟡 Realtime 구독 실패, 폴링으로 대체 필요');
+      }
+    });
+
+  // 구독 해제 함수 반환
+  return () => {
+    console.log('🟡 Realtime 예약 구독 해제...');
+    supabase.removeChannel(subscription);
+  };
+};
+
 // 예약 상태 업데이트 함수
 export const updateReservationStatus = async (id: number, status: 'pending' | 'confirmed' | 'cancelled'): Promise<boolean> => {
   try {
@@ -119,6 +201,12 @@ export const updateReservationStatus = async (id: number, status: 'pending' | 'c
       console.error('상태 업데이트 오류:', error);
       return false;
     }
+
+    // 예약 상태 변경 이벤트 발생
+    window.dispatchEvent(new CustomEvent('reservationUpdate', { 
+      detail: { id, status }
+    }));
+    console.log('🔥 예약 상태 변경 이벤트 발생:', { id, status });
 
     return true;
   } catch (error) {

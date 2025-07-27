@@ -23,6 +23,8 @@ interface DatePickerProps {
   disabled?: boolean
   minDate?: Date
   maxDate?: Date
+  yearRange?: { from: number; to: number }
+  useAdvancedSelector?: boolean
 }
 
 export function DatePicker({
@@ -32,7 +34,9 @@ export function DatePicker({
   className,
   disabled,
   minDate,
-  maxDate
+  maxDate,
+  yearRange,
+  useAdvancedSelector = false
 }: DatePickerProps) {
   const [inputValue, setInputValue] = React.useState("")
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false)
@@ -109,6 +113,10 @@ export function DatePicker({
             }}
             initialFocus
             locale={ko}
+            yearRange={yearRange}
+            minDate={minDate}
+            maxDate={maxDate}
+            useAdvancedSelector={useAdvancedSelector}
           />
         </PopoverContent>
       </Popover>

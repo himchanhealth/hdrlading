@@ -40,7 +40,7 @@ const ContactInfoManagement = () => {
 
   useEffect(() => {
     loadContacts();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadContacts = async () => {
     try {

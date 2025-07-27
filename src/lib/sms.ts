@@ -118,7 +118,7 @@ class SMSService {
   }
 
   // 직접 SMS API 호출 (테스트용)
-  private async sendSMSDirectly(phoneNumber: string, message: string): Promise<any> {
+  private async sendSMSDirectly(phoneNumber: string, message: string): Promise<{ success: boolean; data?: unknown; error?: string }> {
     const url = 'https://api.coolsms.co.kr/messages/v4/send';
     
     const payload = {
@@ -161,7 +161,7 @@ class SMSService {
   }
 
   // 서버 API 호출 (미래 구현용)
-  private async callServerAPI(phoneNumber: string, message: string): Promise<any> {
+  private async callServerAPI(phoneNumber: string, message: string): Promise<{ success: boolean; data?: unknown; error?: string }> {
     // 서버사이드에서 실제 SMS API를 호출하는 엔드포인트
     const response = await fetch('/api/send-sms', {
       method: 'POST',

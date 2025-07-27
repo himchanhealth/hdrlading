@@ -43,7 +43,7 @@ const NewAdminPage = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [reservations, setReservations] = useState<ReservationData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<{ email?: string } | null>(null);
   const [statusFilter, setStatusFilter] = useState<'all' | 'confirmed' | 'pending' | 'cancelled'>('all');
   const [patientDetailModal, setPatientDetailModal] = useState<{
     isOpen: boolean;

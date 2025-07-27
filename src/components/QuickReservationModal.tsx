@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -56,6 +56,12 @@ const QuickReservationModal = ({ children }: QuickReservationModalProps) => {
     e.preventDefault();
     console.log("예약 신청 시작...");
     
+    // 필수 필드 유효성 검사
+    if (!formData.name || !formData.phone || !formData.birthDate || !formData.gender || !formData.examType || !formData.preferredDate || !formData.preferredTime) {
+      alert("필수 항목을 모두 입력해주세요.");
+      return;
+    }
+    
     setIsSubmitting(true);
     
     try {
@@ -106,9 +112,9 @@ const QuickReservationModal = ({ children }: QuickReservationModalProps) => {
           <DialogTitle className="font-korean text-xl text-center text-primary">
             검진예약 신청
           </DialogTitle>
-          <p className="font-korean text-sm text-gray-600 text-center mt-2">
+          <DialogDescription className="font-korean text-sm text-gray-600 text-center mt-2">
             정확한 정보를 입력해주시면 담당자가 빠르게 연락드리겠습니다.
-          </p>
+          </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -157,6 +163,7 @@ const QuickReservationModal = ({ children }: QuickReservationModalProps) => {
                 onDateChange={handleBirthDateChange}
                 placeholder="생년월일을 선택하세요"
                 maxDate={new Date()}
+                yearRange={{ from: 1900, to: new Date().getFullYear() }}
                 className="font-korean"
               />
             </div>
@@ -214,6 +221,8 @@ const QuickReservationModal = ({ children }: QuickReservationModalProps) => {
                 onDateChange={handlePreferredDateChange}
                 placeholder="희망 날짜를 선택하세요"
                 minDate={new Date()}
+                maxDate={new Date(new Date().setMonth(new Date().getMonth() + 6))}
+                useAdvancedSelector={true}
                 className="font-korean"
               />
             </div>

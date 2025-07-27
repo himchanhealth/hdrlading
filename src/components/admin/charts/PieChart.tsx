@@ -41,7 +41,7 @@ const PieChart: React.FC<PieChartProps> = ({
     color: item.color || colors[index % colors.length]
   }));
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ name: string; value: number }> }) => {
     if (active && payload && payload.length) {
       const data = payload[0];
       return (
@@ -61,10 +61,10 @@ const PieChart: React.FC<PieChartProps> = ({
     return null;
   };
 
-  const CustomLegend = ({ payload }: any) => {
+  const CustomLegend = ({ payload }: { payload?: Array<{ value: string; color: string; payload?: { value: number } }> }) => {
     return (
       <div className="flex flex-wrap justify-center gap-4 mt-4">
-        {payload?.map((entry: any, index: number) => (
+        {payload?.map((entry, index: number) => (
           <div key={index} className="flex items-center gap-2">
             <div 
               className="w-3 h-3 rounded-full" 

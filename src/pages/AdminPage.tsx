@@ -35,7 +35,7 @@ import { ko } from 'date-fns/locale';
 const AdminPage = () => {
   const [reservations, setReservations] = useState<ReservationData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<{ email?: string } | null>(null);
   const [statusFilter, setStatusFilter] = useState<'all' | 'confirmed' | 'pending' | 'cancelled'>('all');
   const [activeTab, setActiveTab] = useState('dashboard');
   
@@ -100,7 +100,7 @@ const AdminPage = () => {
     });
     
     // 커스텀 이벤트 리스너 추가
-    const handleTabChange = (event: any) => {
+    const handleTabChange = (event: CustomEvent<string>) => {
       console.log('커스텀 이벤트로 탭 변경:', event.detail);
       setActiveTab(event.detail);
     };
