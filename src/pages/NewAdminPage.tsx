@@ -9,6 +9,10 @@ import ClinicInfo from '@/components/admin/ClinicInfo';
 import CalendarView from '@/components/admin/CalendarView';
 import PatientDetailModal from '@/components/admin/PatientDetailModal';
 import BoardManagement from '@/components/admin/BoardManagement';
+import PatientManagement from '@/components/admin/PatientManagement';
+import ReportsManagement from '@/components/admin/ReportsManagement';
+import ContactManagement from '@/components/admin/ContactManagement';
+import ContactInfoManagement from '@/components/admin/ContactInfoManagement';
 import { 
   Calendar, 
   Phone, 
@@ -28,7 +32,7 @@ import {
   MapPin,
   Shield
 } from 'lucide-react';
-import { getReservations, updateReservationStatus, ReservationData } from '@/lib/supabase';
+import { getReservations, updateReservationStatus, subscribeToReservations, ReservationData } from '@/lib/supabase';
 import { supabase } from '@/lib/supabase';
 import { sendReservationConfirmationSMS } from '@/lib/sms';
 import { format } from 'date-fns';
@@ -58,8 +62,30 @@ const NewAdminPage = () => {
   });
 
   useEffect(() => {
+    console.log('🚨 NewAdminPage useEffect 실행됨!');
     checkUser();
-    loadReservations();
+    
+    // 실시간 예약 데이터 구독
+    console.log('⚡ 실시간 예약 구독 시작...');
+    const unsubscribe = subscribeToReservations((data) => {
+      console.log('⚡ 실시간 예약 데이터 업데이트:', data.length, '개');
+      setReservations(data);
+      
+      // 통계 계산
+      const stats = data.reduce((acc, reservation) => {
+        acc.total++;
+        acc[reservation.status || 'pending']++;
+        return acc;
+      }, { total: 0, pending: 0, confirmed: 0, cancelled: 0 });
+      
+      setStats(stats);
+      setLoading(false);
+    });
+    
+    return () => {
+      console.log('⚡ 실시간 예약 구독 해제...');
+      unsubscribe();
+    };
   }, []);
 
   const checkUser = async () => {
@@ -554,8 +580,8 @@ const NewAdminPage = () => {
     );
   };
 
-  const renderPatients = () => renderPlaceholderContent('환자 관리', '등록된 환자 정보를 관리합니다.', Users);
-  const renderReports = () => renderPlaceholderContent('리포트', '예약 및 진료 통계를 확인합니다.', BarChart3);
+  const renderPatients = () => <PatientManagement />;
+  const renderReports = () => <ReportsManagement />;
   const renderContentManagement = () => <ContentManagement />;
   const renderBoardManagement = () => <BoardManagement />;
   const renderImageManagement = () => renderPlaceholderContent('이미지 관리', '웹사이트 이미지를 관리합니다.', Image);
@@ -563,7 +589,7 @@ const NewAdminPage = () => {
   const renderNotificationManagement = () => renderPlaceholderContent('알림 관리', '이메일 및 SMS 알림을 설정합니다.', Mail);
   const renderClinicInfo = () => <ClinicInfo />;
   const renderBusinessHours = () => renderPlaceholderContent('진료 시간', '진료 시간을 설정합니다.', Clock);
-  const renderContactManagement = () => renderPlaceholderContent('연락처 관리', '병원 연락처를 관리합니다.', Phone);
+  const renderContactManagement = () => <ContactInfoManagement />;
   const renderSecuritySettings = () => renderPlaceholderContent('보안 설정', '관리자 보안 설정을 관리합니다.', Shield);
   const renderSystemSettings = () => renderPlaceholderContent('시스템 설정', '시스템 환경을 설정합니다.', Settings);
 
@@ -583,7 +609,10 @@ const NewAdminPage = () => {
       {/* 사이드바 */}
       <AdminSidebar
         activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={(tab: string) => {
+          console.log('🎯 NewAdminPage onTabChange 실행됨:', tab);
+          setActiveTab(tab);
+        }}
         collapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
         stats={stats}

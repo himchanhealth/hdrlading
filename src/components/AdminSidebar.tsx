@@ -48,6 +48,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
   className,
   stats
 }) => {
+  console.log('🔍 AdminSidebar props 확인:');
+  console.log('🔍 onTabChange 타입:', typeof onTabChange);
+  console.log('🔍 onTabChange 이름:', onTabChange.name);
+  console.log('🔍 activeTab:', activeTab);
+  
   const [contentExpanded, setContentExpanded] = useState(true);
   
   const menuItems = [
@@ -236,12 +241,24 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                           isActive && "bg-blue-600 text-white hover:bg-blue-700"
                         )}
                         onClick={() => {
+                          console.log('🎯 사이드바 메뉴 클릭됨:', item.id);
+                          console.log('🎯 onTabChange 함수 타입:', typeof onTabChange);
+                          console.log('🎯 onTabChange 함수 이름:', onTabChange.name);
+                          console.log('🎯 onTabChange 함수 toString:', onTabChange.toString().substring(0, 100));
+                          
                           if (hasSubItems && !collapsed) {
                             if (item.id === 'content') {
                               setContentExpanded(!contentExpanded);
                             }
                           } else {
-                            onTabChange(item.id);
+                            console.log('🎯 onTabChange 호출 시작:', item.id);
+                            try {
+                              const result = onTabChange(item.id);
+                              console.log('🎯 onTabChange 호출 결과:', result);
+                            } catch (error) {
+                              console.error('🎯 onTabChange 호출 오류:', error);
+                            }
+                            console.log('🎯 onTabChange 호출 완료:', item.id);
                           }
                         }}
                       >

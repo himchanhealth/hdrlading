@@ -23,7 +23,10 @@ import AdminSidebar from '@/components/AdminSidebar';
 import BoardManagement from '@/components/admin/BoardManagement';
 import ContentManagement from '@/components/admin/ContentManagement';
 import ReportsManagement from '@/components/admin/ReportsManagement';
-import { getReservations, updateReservationStatus, ReservationData } from '@/lib/supabase';
+import PatientManagement from '@/components/admin/PatientManagement';
+import StaffManagement from '@/components/admin/StaffManagement';
+import ContactManagement from '@/components/admin/ContactManagement';
+import { getReservations, updateReservationStatus, subscribeToReservations, ReservationData } from '@/lib/supabase';
 import { supabase } from '@/lib/supabase';
 import { sendReservationConfirmationSMS } from '@/lib/sms';
 import { format } from 'date-fns';
@@ -35,6 +38,27 @@ const AdminPage = () => {
   const [user, setUser] = useState<any>(null);
   const [statusFilter, setStatusFilter] = useState<'all' | 'confirmed' | 'pending' | 'cancelled'>('all');
   const [activeTab, setActiveTab] = useState('dashboard');
+  
+  const customTabChangeHandler = (tab: string) => {
+    console.log('🚨🚨🚨 customTabChangeHandler 호출됨!!! 🚨🚨🚨', tab);
+    console.log('🚨 customTabChangeHandler 함수 자체가 실행되었습니다!');
+    console.log('이전 activeTab:', activeTab);
+    
+    // 강제로 렌더링 트리거
+    if (tab === 'contact') {
+      console.log('🔥 contact 탭으로 강제 변경 시도 🔥');
+      console.log('setActiveTab 함수 타입:', typeof setActiveTab);
+      console.log('React useState setter 실행 전...');
+    }
+    
+    setActiveTab(tab);
+    console.log('setActiveTab 호출됨. 새로운 값:', tab);
+    
+    // 비동기적으로 상태 확인
+    setTimeout(() => {
+      console.log('setTimeout에서 activeTab 확인:', activeTab);
+    }, 0);
+  };
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [patientDetailModal, setPatientDetailModal] = useState<{
     isOpen: boolean;
@@ -53,9 +77,47 @@ const AdminPage = () => {
   });
 
   useEffect(() => {
+    console.log('🚨 AdminPage useEffect 실행됨!');
     checkUser();
-    loadReservations();
+    
+    // 실시간 예약 데이터 구독
+    console.log('🔴 실시간 예약 구독 시작...');
+    console.log('🔴 subscribeToReservations 함수 타입:', typeof subscribeToReservations);
+    
+    const unsubscribe = subscribeToReservations((data) => {
+      console.log('🔴 실시간 예약 데이터 업데이트:', data.length, '개');
+      setReservations(data);
+      
+      // 통계 계산
+      const stats = data.reduce((acc, reservation) => {
+        acc.total++;
+        acc[reservation.status || 'pending']++;
+        return acc;
+      }, { total: 0, pending: 0, confirmed: 0, cancelled: 0 });
+      
+      setStats(stats);
+      setLoading(false);
+    });
+    
+    // 커스텀 이벤트 리스너 추가
+    const handleTabChange = (event: any) => {
+      console.log('커스텀 이벤트로 탭 변경:', event.detail);
+      setActiveTab(event.detail);
+    };
+    
+    window.addEventListener('changeTab', handleTabChange);
+    
+    return () => {
+      console.log('🔴 실시간 예약 구독 해제...');
+      unsubscribe();
+      window.removeEventListener('changeTab', handleTabChange);
+    };
   }, []);
+
+  // activeTab 변경 감지용 useEffect
+  useEffect(() => {
+    console.log('🔄 activeTab 변경 감지됨:', activeTab);
+  }, [activeTab]);
 
   const checkUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -246,6 +308,26 @@ const AdminPage = () => {
   }
 
   const renderContent = () => {
+    console.log('🎯 renderContent 호출됨. 현재 activeTab:', activeTab, 'typeof:', typeof activeTab);
+    console.log('🎯 현재 URL hash:', window.location.hash);
+    console.log('🎯 현재 URL search:', window.location.search);
+    console.log('🎯 activeTab === "contact":', activeTab === 'contact');
+    console.log('🎯 activeTab === contact (문자열 비교):', activeTab === 'contact');
+    console.log('🎯 activeTab 길이:', activeTab.length);
+    console.log('🎯 activeTab 문자 코드:', [...activeTab].map(c => c.charCodeAt(0)));
+    
+    // 임시로 patients 강제 처리
+    if (window.location.hash === '#patients' || window.location.search.includes('tab=patients') || activeTab === 'patients') {
+      console.log('환자 관리 강제 렌더링!');
+      return <PatientManagement />;
+    }
+    
+    // 연락처 관리 케이스 처리
+    if (activeTab === 'contact') {
+      console.log('contact if문 실행됨!');
+      return <ContactManagement />;
+    }
+    
     // 리포트 케이스 처리
     if (activeTab === 'reports') {
       return <ReportsManagement />;
@@ -344,6 +426,14 @@ const AdminPage = () => {
       
       case 'board-management':
         return renderBoardManagement();
+
+      case 'patients':
+        console.log('환자 관리 탭이 렌더링됩니다.');
+        return <PatientManagement />;
+
+      case 'contact':
+        console.log('contact case 실행됨!');
+        return <ContactManagement />;
 
       case 'reservations':
         return (
@@ -534,6 +624,7 @@ const AdminPage = () => {
         );
 
       default:
+        console.log('default 케이스 실행됨. activeTab:', activeTab);
         return (
           <Card>
             <CardContent className="p-6">
@@ -554,7 +645,10 @@ const AdminPage = () => {
       {/* 사이드바 */}
       <AdminSidebar
         activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={(tab: string) => {
+          console.log('🎯 AdminPage 인라인 onTabChange 실행됨:', tab);
+          customTabChangeHandler(tab);
+        }}
         collapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
         stats={stats}
@@ -583,7 +677,7 @@ const AdminPage = () => {
         </header>
 
         {/* 콘텐츠 영역 */}
-        <div className="flex-1 p-6">
+        <div className="flex-1 p-6" data-main-content>
           {renderContent()}
         </div>
       </div>
