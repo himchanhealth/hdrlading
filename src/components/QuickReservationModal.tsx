@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Calendar, Phone, User, Clock, FileText, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { sendReservationEmail, type ReservationData } from "@/lib/email";
 import { saveReservation } from "@/lib/supabase";
 import { format } from "date-fns";
@@ -19,7 +19,57 @@ interface QuickReservationModalProps {
 const QuickReservationModal = ({ children }: QuickReservationModalProps) => {
   const { notifyNewReservation } = useNotificationContext();
   
-  console.log('🔔 QuickReservationModal - notifyNewReservation function:', typeof notifyNewReservation);
+  // 디버그 모드 감지
+  const isDebugMode = new URLSearchParams(window.location.search).get('debug') === 'true';
+  
+  // 배포 환경 감지
+  const isProduction = import.meta.env.PROD;
+  const currentUrl = window.location.href;
+  
+  // 중복 알림 방지를 위한 ref
+  const alertShownRef = useRef(false);
+  const submissionTimeRef = useRef<number | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  
+  console.log('🔔 QuickReservationModal 초기화:', {
+    notifyNewReservation: typeof notifyNewReservation,
+    isDebugMode,
+    isProduction,
+    currentUrl
+  });
+  
+  // 중복 알림 방지 함수 (강화된 버전)
+  const showAlert = (message: string) => {
+    const now = Date.now();
+    
+    // 중복 알림 방지 로직 (배포/개발 환경 모두 적용)
+    if (alertShownRef.current) {
+      console.log('🚫 중복 알림 방지 (이미 표시됨):', message);
+      return;
+    }
+    
+    // 최근 제출 시간과 너무 가까우면 방지 (1초 이내)
+    if (submissionTimeRef.current && (now - submissionTimeRef.current) < 1000) {
+      console.log('🚫 중복 알림 방지 (시간 간격 부족):', message);
+      return;
+    }
+    
+    console.log('✅ 알림 표시:', {
+      message,
+      isProduction,
+      currentUrl,
+      timestamp: new Date().toISOString()
+    });
+    
+    alertShownRef.current = true;
+    submissionTimeRef.current = now;
+    alert(message);
+    
+    // 3초 후 다시 알림 가능하도록 설정
+    setTimeout(() => {
+      alertShownRef.current = false;
+    }, 3000);
+  };
   
   const [formData, setFormData] = useState({
     name: "",
@@ -60,7 +110,14 @@ const QuickReservationModal = ({ children }: QuickReservationModalProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("🔍 예약 신청 시작...");
+    const submitStartTime = Date.now();
+    console.log("🔍 예약 신청 시작:", {
+      timestamp: new Date().toISOString(),
+      isSubmitting,
+      alertShown: alertShownRef.current,
+      isProduction,
+      url: currentUrl
+    });
     
     // 이미 제출 중이면 중복 제출 방지
     if (isSubmitting) {
@@ -68,14 +125,32 @@ const QuickReservationModal = ({ children }: QuickReservationModalProps) => {
       return;
     }
     
+    // 진행 중인 요청이 있으면 취소
+    if (abortControllerRef.current) {
+      console.log("⚠️ 진행 중인 요청 취소");
+      abortControllerRef.current.abort();
+    }
+    
+    // 최근 제출과 너무 가까우면 방지 (2초 이내)
+    if (submissionTimeRef.current && (submitStartTime - submissionTimeRef.current) < 2000) {
+      console.log("⚠️ 최근 제출과 너무 가깝습니다. 중복 제출 방지됨", {
+        timeDiff: submitStartTime - submissionTimeRef.current
+      });
+      return;
+    }
+    
+    // 새로운 AbortController 생성
+    abortControllerRef.current = new AbortController();
+    
     // 필수 필드 유효성 검사
     if (!formData.name || !formData.phone || !formData.birthDate || !formData.gender || !formData.examType || !formData.preferredDate || !formData.preferredTime) {
-      alert("필수 항목을 모두 입력해주세요.");
+      showAlert("필수 항목을 모두 입력해주세요.");
       return;
     }
     
     setIsSubmitting(true);
-    console.log("🔍 제출 상태를 true로 변경");
+    submissionTimeRef.current = submitStartTime;
+    console.log("🔍 제출 상태를 true로 변경, 제출 시간 기록:", new Date(submitStartTime).toISOString());
     
     try {
       console.log("🔍 전송할 데이터:", formData);
@@ -97,7 +172,7 @@ const QuickReservationModal = ({ children }: QuickReservationModalProps) => {
 
       if (!supabaseResult.success) {
         console.error("❌ Supabase 저장 실패:", supabaseResult.error);
-        alert(`예약 저장에 실패했습니다: ${supabaseResult.error}\n\n직접 연락주세요:\n📞 063-272-3323`);
+        showAlert(`예약 저장에 실패했습니다: ${supabaseResult.error}\n\n직접 연락주세요:\n📞 063-272-3323`);
         return;
       }
 
@@ -152,7 +227,7 @@ const QuickReservationModal = ({ children }: QuickReservationModalProps) => {
         }
 
         // 사용자에게 완료 메시지 표시 (알림 전송 후)
-        alert("예약 신청이 완료되었습니다. 곧 연락드리겠습니다.");
+        showAlert("예약 신청이 완료되었습니다. 곧 연락드리겠습니다.");
         
         // 폼 초기화
         setFormData({
@@ -172,9 +247,11 @@ const QuickReservationModal = ({ children }: QuickReservationModalProps) => {
         setIsDialogOpen(false);
     } catch (error) {
       console.error("예약 신청 처리 중 오류:", error);
-      alert("예약 신청 중 오류가 발생했습니다.\n\n직접 연락주세요:\n📞 063-272-3323");
+      showAlert("예약 신청 중 오류가 발생했습니다.\n\n직접 연락주세요:\n📞 063-272-3323");
     } finally {
       setIsSubmitting(false);
+      abortControllerRef.current = null;
+      console.log("🔍 제출 완료, 상태 초기화");
     }
   };
 

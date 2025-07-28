@@ -22,20 +22,37 @@ const DebugPanel = () => {
       timestamp: new Date().toISOString()
     });
 
-    // 기존 콘솔 로그 캡처
+    // 기존 콘솔 로그 캡처 (비침습적 방식)
     const originalLog = console.log;
-    console.log = (...args) => {
-      originalLog(...args);
-      setLogs(prev => [...prev.slice(-50), `[LOG] ${new Date().toLocaleTimeString()}: ${args.join(' ')}`]);
+    const originalError = console.error;
+    
+    // 콘솔 오버라이드를 비동기로 처리하여 정상 실행 흐름을 방해하지 않음
+    const logCapture = (...args: any[]) => {
+      // 원본 함수를 먼저 호출
+      originalLog.apply(console, args);
+      // 로그 캡처는 다음 이벤트 루프에서 처리
+      setTimeout(() => {
+        setLogs(prev => [...prev.slice(-50), `[LOG] ${new Date().toLocaleTimeString()}: ${args.join(' ')}`]);
+      }, 0);
     };
 
-    const originalError = console.error;
-    console.error = (...args) => {
-      originalError(...args);
-      setLogs(prev => [...prev.slice(-50), `[ERROR] ${new Date().toLocaleTimeString()}: ${args.join(' ')}`]);
+    const errorCapture = (...args: any[]) => {
+      // 원본 함수를 먼저 호출
+      originalError.apply(console, args);
+      // 로그 캡처는 다음 이벤트 루프에서 처리
+      setTimeout(() => {
+        setLogs(prev => [...prev.slice(-50), `[ERROR] ${new Date().toLocaleTimeString()}: ${args.join(' ')}`]);
+      }, 0);
     };
+
+    // 디버그 모드에서만 콘솔 오버라이드 적용
+    if (new URLSearchParams(window.location.search).get('debug') === 'true') {
+      console.log = logCapture;
+      console.error = errorCapture;
+    }
 
     return () => {
+      // 클린업 시 원본 함수 복원
       console.log = originalLog;
       console.error = originalError;
     };
