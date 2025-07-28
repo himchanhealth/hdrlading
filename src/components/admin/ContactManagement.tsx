@@ -5,18 +5,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Phone, 
   Mail, 
-  MapPin, 
-  Clock, 
   Edit, 
-  Save, 
   X, 
   Plus,
   Trash2,
   Users,
-  Building
+  Briefcase
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
@@ -31,49 +29,27 @@ interface Contact {
   display_order: number;
 }
 
-interface BusinessHours {
-  id?: number;
-  day_of_week: string;
-  open_time: string;
-  close_time: string;
-  is_closed: boolean;
-  break_start?: string;
-  break_end?: string;
-}
 
-interface ClinicInfo {
+interface StaffContact {
   id?: number;
   name: string;
-  address: string;
-  postal_code: string;
-  description?: string;
-  website?: string;
+  position: string;
+  department: string;
+  phone: string;
+  email?: string;
+  extension?: string;
+  mobile?: string;
+  is_active: boolean;
+  notes?: string;
 }
 
 const ContactManagement = () => {
   const [contacts, setContacts] = useState<Contact[]>([]);
-  const [businessHours, setBusinessHours] = useState<BusinessHours[]>([]);
-  const [clinicInfo, setClinicInfo] = useState<ClinicInfo>({
-    name: '',
-    address: '',
-    postal_code: '',
-    description: '',
-    website: ''
-  });
+  const [staffContacts, setStaffContacts] = useState<StaffContact[]>([]);
   const [editingContact, setEditingContact] = useState<Contact | null>(null);
-  const [editingHours, setEditingHours] = useState<BusinessHours | null>(null);
-  const [isEditingClinic, setIsEditingClinic] = useState(false);
+  const [editingStaffContact, setEditingStaffContact] = useState<StaffContact | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const defaultBusinessHours = [
-    { day_of_week: '월요일', open_time: '09:00', close_time: '18:00', is_closed: false, break_start: '12:00', break_end: '13:00' },
-    { day_of_week: '화요일', open_time: '09:00', close_time: '18:00', is_closed: false, break_start: '12:00', break_end: '13:00' },
-    { day_of_week: '수요일', open_time: '09:00', close_time: '18:00', is_closed: false, break_start: '12:00', break_end: '13:00' },
-    { day_of_week: '목요일', open_time: '09:00', close_time: '18:00', is_closed: false, break_start: '12:00', break_end: '13:00' },
-    { day_of_week: '금요일', open_time: '09:00', close_time: '18:00', is_closed: false, break_start: '12:00', break_end: '13:00' },
-    { day_of_week: '토요일', open_time: '09:00', close_time: '13:00', is_closed: false },
-    { day_of_week: '일요일', open_time: '', close_time: '', is_closed: true }
-  ];
 
   const defaultContacts = [
     { type: 'main' as const, title: '대표전화', phone: '02-1234-5678', email: 'info@himchanhealth.com', description: '일반 상담 및 예약', is_active: true, display_order: 1 },
@@ -82,17 +58,24 @@ const ContactManagement = () => {
     { type: 'fax' as const, title: '팩스', phone: '02-1234-5681', description: '서류 전송용', is_active: true, display_order: 4 }
   ];
 
+  const defaultStaffContacts = [
+    { id: 1, name: '김영상', position: '과장', department: '영상의학과', phone: '02-1234-5680', extension: '101', email: 'kim.ys@himchanhealth.com', mobile: '010-1234-5678', is_active: true, notes: 'CT/MRI 전문' },
+    { id: 2, name: '이진단', position: '의사', department: '영상의학과', phone: '02-1234-5680', extension: '102', email: 'lee.jd@himchanhealth.com', mobile: '010-2345-6789', is_active: true, notes: '초음파 전문' },
+    { id: 3, name: '박방사', position: '방사선사', department: '영상의학과', phone: '02-1234-5680', extension: '103', email: 'park.bs@himchanhealth.com', mobile: '010-3456-7890', is_active: true, notes: '일반촬영 담당' },
+    { id: 4, name: '최간호', position: '수간호사', department: '간호부', phone: '02-1234-5682', extension: '201', email: 'choi.kh@himchanhealth.com', mobile: '010-4567-8901', is_active: true, notes: '병동 관리' },
+    { id: 5, name: '정원무', position: '팀장', department: '원무과', phone: '02-1234-5683', extension: '301', email: 'jung.wm@himchanhealth.com', mobile: '010-5678-9012', is_active: true, notes: '수납 및 보험 업무' }
+  ];
+
   useEffect(() => {
     loadData();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   const loadData = async () => {
     try {
       setLoading(true);
       await Promise.all([
         loadContacts(),
-        loadBusinessHours(),
-        loadClinicInfo()
+        loadStaffContacts()
       ]);
     } catch (error) {
       console.error('데이터 로딩 오류:', error);
@@ -103,7 +86,6 @@ const ContactManagement = () => {
 
   const loadContacts = async () => {
     try {
-      // 임시로 기본값 설정 (실제 구현에서는 Supabase에서 가져옴)
       setContacts(defaultContacts);
     } catch (error) {
       console.error('연락처 조회 오류:', error);
@@ -111,38 +93,21 @@ const ContactManagement = () => {
     }
   };
 
-  const loadBusinessHours = async () => {
+  const loadStaffContacts = async () => {
     try {
-      // 임시로 기본값 설정 (실제 구현에서는 Supabase에서 가져옴)
-      setBusinessHours(defaultBusinessHours);
+      setStaffContacts(defaultStaffContacts);
     } catch (error) {
-      console.error('영업시간 조회 오류:', error);
-      setBusinessHours(defaultBusinessHours);
+      console.error('직원 연락처 조회 오류:', error);
+      setStaffContacts(defaultStaffContacts);
     }
   };
 
-  const loadClinicInfo = async () => {
-    try {
-      // 임시로 기본값 설정 (실제 구현에서는 Supabase에서 가져옴)
-      setClinicInfo({
-        name: '현대영상의학과',
-        address: '서울특별시 강남구 테헤란로 123 현대빌딩 5층',
-        postal_code: '06234',
-        description: '정확한 진단과 최신 장비로 건강을 지켜드리는 영상의학과입니다.',
-        website: 'https://himchanhealth.com'
-      });
-    } catch (error) {
-      console.error('병원 정보 조회 오류:', error);
-    }
-  };
 
   const handleSaveContact = async (contact: Contact) => {
     try {
       if (contact.id) {
-        // 수정
         setContacts(prev => prev.map(c => c.id === contact.id ? contact : c));
       } else {
-        // 새로 추가
         const newContact = { ...contact, id: Date.now() };
         setContacts(prev => [...prev, newContact]);
       }
@@ -164,28 +129,32 @@ const ContactManagement = () => {
     }
   };
 
-  const handleSaveBusinessHours = async (hours: BusinessHours) => {
+  const handleSaveStaffContact = async (staffContact: StaffContact) => {
     try {
-      setBusinessHours(prev => prev.map(h => 
-        h.day_of_week === hours.day_of_week ? hours : h
-      ));
-      setEditingHours(null);
+      if (staffContact.id) {
+        setStaffContacts(prev => prev.map(s => s.id === staffContact.id ? staffContact : s));
+      } else {
+        const newStaffContact = { ...staffContact, id: Date.now() };
+        setStaffContacts(prev => [...prev, newStaffContact]);
+      }
+      setEditingStaffContact(null);
     } catch (error) {
-      console.error('영업시간 저장 오류:', error);
-      alert('영업시간 저장에 실패했습니다.');
+      console.error('직원 연락처 저장 오류:', error);
+      alert('직원 연락처 저장에 실패했습니다.');
     }
   };
 
-  const handleSaveClinicInfo = async () => {
+  const handleDeleteStaffContact = async (id: number) => {
+    if (!confirm('이 직원 연락처를 삭제하시겠습니까?')) return;
+    
     try {
-      // 실제 구현에서는 Supabase에 저장
-      setIsEditingClinic(false);
-      alert('병원 정보가 저장되었습니다.');
+      setStaffContacts(prev => prev.filter(s => s.id !== id));
     } catch (error) {
-      console.error('병원 정보 저장 오류:', error);
-      alert('병원 정보 저장에 실패했습니다.');
+      console.error('직원 연락처 삭제 오류:', error);
+      alert('직원 연락처 삭제에 실패했습니다.');
     }
   };
+
 
   const getContactTypeLabel = (type: string) => {
     const labels = {
@@ -221,223 +190,202 @@ const ContactManagement = () => {
         <h1 className="text-2xl font-bold text-gray-900">연락처 관리</h1>
       </div>
 
-      {/* 병원 정보 */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Building className="h-5 w-5" />
-                병원 정보
-              </CardTitle>
-              <CardDescription>기본 병원 정보를 관리합니다.</CardDescription>
-            </div>
-            <Button
-              variant={isEditingClinic ? "outline" : "default"}
-              size="sm"
-              onClick={() => setIsEditingClinic(!isEditingClinic)}
-            >
-              {isEditingClinic ? (
-                <>
-                  <X className="h-4 w-4 mr-2" />
-                  취소
-                </>
-              ) : (
-                <>
-                  <Edit className="h-4 w-4 mr-2" />
-                  수정
-                </>
-              )}
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4">
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="clinic-name">병원명</Label>
-                <Input
-                  id="clinic-name"
-                  value={clinicInfo.name}
-                  disabled={!isEditingClinic}
-                  onChange={(e) => setClinicInfo(prev => ({ ...prev, name: e.target.value }))}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="postal-code">우편번호</Label>
-                <Input
-                  id="postal-code"
-                  value={clinicInfo.postal_code}
-                  disabled={!isEditingClinic}
-                  onChange={(e) => setClinicInfo(prev => ({ ...prev, postal_code: e.target.value }))}
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="clinic-address">주소</Label>
-              <Input
-                id="clinic-address"
-                value={clinicInfo.address}
-                disabled={!isEditingClinic}
-                onChange={(e) => setClinicInfo(prev => ({ ...prev, address: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="clinic-website">웹사이트</Label>
-              <Input
-                id="clinic-website"
-                value={clinicInfo.website}
-                disabled={!isEditingClinic}
-                onChange={(e) => setClinicInfo(prev => ({ ...prev, website: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="clinic-description">설명</Label>
-              <Textarea
-                id="clinic-description"
-                value={clinicInfo.description}
-                disabled={!isEditingClinic}
-                onChange={(e) => setClinicInfo(prev => ({ ...prev, description: e.target.value }))}
-              />
-            </div>
-            {isEditingClinic && (
-              <div className="flex gap-2">
-                <Button onClick={handleSaveClinicInfo} className="flex items-center gap-2">
-                  <Save className="h-4 w-4" />
-                  저장
+      <Tabs defaultValue="contacts" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="contacts" className="flex items-center gap-2">
+            <Phone className="h-4 w-4" />
+            병원 연락처
+          </TabsTrigger>
+          <TabsTrigger value="staff" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            직원 연락처
+          </TabsTrigger>
+        </TabsList>
+
+
+        <TabsContent value="contacts" className="space-y-6">
+          {/* 병원 연락처 정보 */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Phone className="h-5 w-5" />
+                    병원 연락처
+                  </CardTitle>
+                  <CardDescription>병원의 대표 연락처 정보를 관리합니다.</CardDescription>
+                </div>
+                <Button
+                  onClick={() => setEditingContact({
+                    type: 'main',
+                    title: '',
+                    phone: '',
+                    email: '',
+                    description: '',
+                    is_active: true,
+                    display_order: contacts.length + 1
+                  })}
+                  className="flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  연락처 추가
                 </Button>
               </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 연락처 정보 */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Phone className="h-5 w-5" />
-                연락처 정보
-              </CardTitle>
-              <CardDescription>병원 연락처 정보를 관리합니다.</CardDescription>
-            </div>
-            <Button
-              onClick={() => setEditingContact({
-                type: 'main',
-                title: '',
-                phone: '',
-                email: '',
-                description: '',
-                is_active: true,
-                display_order: contacts.length + 1
-              })}
-              className="flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              연락처 추가
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {contacts.map((contact) => (
-              <div key={contact.id} className="border rounded-lg p-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge className={getContactTypeColor(contact.type)}>
-                        {getContactTypeLabel(contact.type)}
-                      </Badge>
-                      <h3 className="font-semibold">{contact.title}</h3>
-                      {!contact.is_active && (
-                        <Badge variant="secondary">비활성</Badge>
-                      )}
-                    </div>
-                    <div className="space-y-1 text-sm text-gray-600">
-                      <div className="flex items-center gap-2">
-                        <Phone className="h-4 w-4" />
-                        <span>{contact.phone}</span>
-                      </div>
-                      {contact.email && (
-                        <div className="flex items-center gap-2">
-                          <Mail className="h-4 w-4" />
-                          <span>{contact.email}</span>
-                        </div>
-                      )}
-                      {contact.description && (
-                        <p className="text-gray-500">{contact.description}</p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setEditingContact(contact)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => contact.id && handleDeleteContact(contact.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 진료시간 */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5" />
-            진료시간
-          </CardTitle>
-          <CardDescription>요일별 진료시간을 관리합니다.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {businessHours.map((hours) => (
-              <div key={hours.day_of_week} className="border rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-4">
-                      <span className="font-medium w-16">{hours.day_of_week}</span>
-                      {hours.is_closed ? (
-                        <Badge variant="secondary">휴진</Badge>
-                      ) : (
-                        <div className="flex items-center gap-2 text-sm">
-                          <span>{hours.open_time} - {hours.close_time}</span>
-                          {hours.break_start && hours.break_end && (
-                            <span className="text-gray-500">
-                              (점심시간: {hours.break_start} - {hours.break_end})
-                            </span>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {contacts.map((contact) => (
+                  <div key={contact.id} className="border rounded-lg p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge className={getContactTypeColor(contact.type)}>
+                            {getContactTypeLabel(contact.type)}
+                          </Badge>
+                          <h3 className="font-semibold">{contact.title}</h3>
+                          {!contact.is_active && (
+                            <Badge variant="secondary">비활성</Badge>
                           )}
                         </div>
-                      )}
+                        <div className="space-y-1 text-sm text-gray-600">
+                          <div className="flex items-center gap-2">
+                            <Phone className="h-4 w-4" />
+                            <span>{contact.phone}</span>
+                          </div>
+                          {contact.email && (
+                            <div className="flex items-center gap-2">
+                              <Mail className="h-4 w-4" />
+                              <span>{contact.email}</span>
+                            </div>
+                          )}
+                          {contact.description && (
+                            <p className="text-gray-500">{contact.description}</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setEditingContact(contact)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => contact.id && handleDeleteContact(contact.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setEditingHours(hours)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="staff" className="space-y-6">
+          {/* 직원 연락처 정보 */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5" />
+                    직원 연락처
+                  </CardTitle>
+                  <CardDescription>병원 직원들의 연락처 정보를 관리합니다.</CardDescription>
+                </div>
+                <Button
+                  onClick={() => setEditingStaffContact({
+                    name: '',
+                    position: '',
+                    department: '',
+                    phone: '',
+                    email: '',
+                    extension: '',
+                    mobile: '',
+                    is_active: true,
+                    notes: ''
+                  })}
+                  className="flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  직원 추가
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {staffContacts.map((staff) => (
+                  <div key={staff.id} className="border rounded-lg p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="font-semibold text-lg">{staff.name}</h3>
+                          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                            {staff.position}
+                          </Badge>
+                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                            {staff.department}
+                          </Badge>
+                          {!staff.is_active && (
+                            <Badge variant="secondary">비활성</Badge>
+                          )}
+                        </div>
+                        <div className="grid md:grid-cols-2 gap-2 text-sm text-gray-600">
+                          <div className="flex items-center gap-2">
+                            <Phone className="h-4 w-4" />
+                            <span>내선: {staff.phone}</span>
+                            {staff.extension && <span className="text-gray-500">({staff.extension})</span>}
+                          </div>
+                          {staff.mobile && (
+                            <div className="flex items-center gap-2">
+                              <Phone className="h-4 w-4" />
+                              <span>휴대폰: {staff.mobile}</span>
+                            </div>
+                          )}
+                          {staff.email && (
+                            <div className="flex items-center gap-2">
+                              <Mail className="h-4 w-4" />
+                              <span>{staff.email}</span>
+                            </div>
+                          )}
+                          {staff.notes && (
+                            <div className="flex items-center gap-2">
+                              <Briefcase className="h-4 w-4" />
+                              <span>{staff.notes}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setEditingStaffContact(staff)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => staff.id && handleDeleteStaffContact(staff.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       {/* 연락처 편집 모달 */}
       {editingContact && (
@@ -523,78 +471,103 @@ const ContactManagement = () => {
         </div>
       )}
 
-      {/* 진료시간 편집 모달 */}
-      {editingHours && (
+      {/* 직원 연락처 편집 모달 */}
+      {editingStaffContact && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-semibold mb-4">
-              {editingHours.day_of_week} 진료시간 수정
+              {editingStaffContact.id ? '직원 정보 수정' : '직원 추가'}
             </h3>
             <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="staff-name">이름</Label>
+                <Input
+                  id="staff-name"
+                  value={editingStaffContact.name}
+                  onChange={(e) => setEditingStaffContact(prev => prev && ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="staff-position">직책</Label>
+                  <Input
+                    id="staff-position"
+                    value={editingStaffContact.position}
+                    onChange={(e) => setEditingStaffContact(prev => prev && ({ ...prev, position: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="staff-department">부서</Label>
+                  <Input
+                    id="staff-department"
+                    value={editingStaffContact.department}
+                    onChange={(e) => setEditingStaffContact(prev => prev && ({ ...prev, department: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="staff-phone">내선번호</Label>
+                  <Input
+                    id="staff-phone"
+                    value={editingStaffContact.phone}
+                    onChange={(e) => setEditingStaffContact(prev => prev && ({ ...prev, phone: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="staff-extension">익스텐션</Label>
+                  <Input
+                    id="staff-extension"
+                    value={editingStaffContact.extension || ''}
+                    onChange={(e) => setEditingStaffContact(prev => prev && ({ ...prev, extension: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="staff-mobile">휴대폰</Label>
+                <Input
+                  id="staff-mobile"
+                  value={editingStaffContact.mobile || ''}
+                  onChange={(e) => setEditingStaffContact(prev => prev && ({ ...prev, mobile: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="staff-email">이메일</Label>
+                <Input
+                  id="staff-email"
+                  type="email"
+                  value={editingStaffContact.email || ''}
+                  onChange={(e) => setEditingStaffContact(prev => prev && ({ ...prev, email: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="staff-notes">메모</Label>
+                <Textarea
+                  id="staff-notes"
+                  value={editingStaffContact.notes || ''}
+                  onChange={(e) => setEditingStaffContact(prev => prev && ({ ...prev, notes: e.target.value }))}
+                />
+              </div>
               <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
-                  id="hours-closed"
-                  checked={editingHours.is_closed}
-                  onChange={(e) => setEditingHours(prev => prev && ({ ...prev, is_closed: e.target.checked }))}
+                  id="staff-active"
+                  checked={editingStaffContact.is_active}
+                  onChange={(e) => setEditingStaffContact(prev => prev && ({ ...prev, is_active: e.target.checked }))}
                 />
-                <Label htmlFor="hours-closed">휴진</Label>
+                <Label htmlFor="staff-active">활성화</Label>
               </div>
-              {!editingHours.is_closed && (
-                <>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="open-time">시작시간</Label>
-                      <Input
-                        id="open-time"
-                        type="time"
-                        value={editingHours.open_time}
-                        onChange={(e) => setEditingHours(prev => prev && ({ ...prev, open_time: e.target.value }))}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="close-time">종료시간</Label>
-                      <Input
-                        id="close-time"
-                        type="time"
-                        value={editingHours.close_time}
-                        onChange={(e) => setEditingHours(prev => prev && ({ ...prev, close_time: e.target.value }))}
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="break-start">점심시작 (선택)</Label>
-                      <Input
-                        id="break-start"
-                        type="time"
-                        value={editingHours.break_start || ''}
-                        onChange={(e) => setEditingHours(prev => prev && ({ ...prev, break_start: e.target.value }))}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="break-end">점심종료 (선택)</Label>
-                      <Input
-                        id="break-end"
-                        type="time"
-                        value={editingHours.break_end || ''}
-                        onChange={(e) => setEditingHours(prev => prev && ({ ...prev, break_end: e.target.value }))}
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
             </div>
             <div className="flex gap-2 mt-6">
               <Button
-                onClick={() => handleSaveBusinessHours(editingHours)}
+                onClick={() => handleSaveStaffContact(editingStaffContact)}
                 className="flex-1"
               >
                 저장
               </Button>
               <Button
                 variant="outline"
-                onClick={() => setEditingHours(null)}
+                onClick={() => setEditingStaffContact(null)}
                 className="flex-1"
               >
                 취소
@@ -603,6 +576,7 @@ const ContactManagement = () => {
           </div>
         </div>
       )}
+
     </div>
   );
 };

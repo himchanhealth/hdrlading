@@ -13,6 +13,9 @@ import PatientManagement from '@/components/admin/PatientManagement';
 import ReportsManagement from '@/components/admin/ReportsManagement';
 import ContactManagement from '@/components/admin/ContactManagement';
 import ContactInfoManagement from '@/components/admin/ContactInfoManagement';
+import ReservationNotification from '@/components/admin/ReservationNotification';
+import { useNotificationContext } from '@/contexts/NotificationContext';
+import { requestNotificationPermission } from '@/contexts/NotificationContext';
 import { 
   Calendar, 
   Phone, 
@@ -39,6 +42,15 @@ import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 
 const NewAdminPage = () => {
+  const {
+    notifications,
+    addNotification,
+    markAsRead,
+    markAllAsRead,
+    dismissNotification,
+    notifyNewReservation
+  } = useNotificationContext();
+  
   const [activeTab, setActiveTab] = useState('dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [reservations, setReservations] = useState<ReservationData[]>([]);
@@ -64,6 +76,13 @@ const NewAdminPage = () => {
   useEffect(() => {
     console.log('🚨 NewAdminPage useEffect 실행됨!');
     checkUser();
+    
+    // 브라우저 알림 권한 요청
+    requestNotificationPermission().then(granted => {
+      if (granted) {
+        console.log('📱 브라우저 알림 권한이 허용되었습니다.');
+      }
+    });
     
     // 실시간 예약 데이터 구독
     console.log('⚡ 실시간 예약 구독 시작...');
@@ -589,7 +608,7 @@ const NewAdminPage = () => {
   const renderNotificationManagement = () => renderPlaceholderContent('알림 관리', '이메일 및 SMS 알림을 설정합니다.', Mail);
   const renderClinicInfo = () => <ClinicInfo />;
   const renderBusinessHours = () => renderPlaceholderContent('진료 시간', '진료 시간을 설정합니다.', Clock);
-  const renderContactManagement = () => <ContactInfoManagement />;
+  const renderContactManagement = () => <ContactManagement />;
   const renderSecuritySettings = () => renderPlaceholderContent('보안 설정', '관리자 보안 설정을 관리합니다.', Shield);
   const renderSystemSettings = () => renderPlaceholderContent('시스템 설정', '시스템 환경을 설정합니다.', Settings);
 
@@ -644,6 +663,34 @@ const NewAdminPage = () => {
                 </h1>
               </div>
               <div className="flex items-center gap-4">
+                {/* 테스트용 알림 생성 버튼 */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    console.log('🔔 테스트 알림 생성 버튼 클릭됨');
+                    notifyNewReservation({
+                      patientName: '테스트환자',
+                      phone: '010-1234-5678',
+                      examType: 'MRI 검사',
+                      preferredDate: '2024-01-01',
+                      preferredTime: '10:00'
+                    });
+                  }}
+                  className="text-xs"
+                >
+                  테스트 알림
+                </Button>
+                <ReservationNotification
+                  notifications={notifications}
+                  onMarkAsRead={markAsRead}
+                  onMarkAllAsRead={markAllAsRead}
+                  onDismiss={dismissNotification}
+                  onNavigateToReservation={(notification) => {
+                    console.log('🎯 상세보기 클릭 - 예약 관리 탭으로 이동:', notification);
+                    setActiveTab('reservations');
+                  }}
+                />
                 <span className="text-sm text-gray-600">
                   {user?.email || 'admin@himchanhealth.com'}
                 </span>

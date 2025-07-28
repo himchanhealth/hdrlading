@@ -9,12 +9,17 @@ import { Calendar, Phone, User, Clock, FileText, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { sendReservationEmail, type ReservationData } from "@/lib/email";
 import { format } from "date-fns";
+import { useNotificationContext } from "@/contexts/NotificationContext";
 
 interface QuickReservationModalProps {
   children: React.ReactNode;
 }
 
 const QuickReservationModal = ({ children }: QuickReservationModalProps) => {
+  const { notifyNewReservation } = useNotificationContext();
+  
+  console.log('🔔 QuickReservationModal - notifyNewReservation function:', typeof notifyNewReservation);
+  
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -73,6 +78,42 @@ const QuickReservationModal = ({ children }: QuickReservationModalProps) => {
       if (emailSent) {
         console.log("예약 신청 성공!");
         alert("예약 신청이 완료되었습니다. 곧 연락드리겠습니다.");
+        
+        // 관리자에게 알림 전송
+        console.log('🔔 예약 성공! 알림 전송 시작...');
+        const examTypeMap: { [key: string]: string } = {
+          'mri': 'MRI 검사',
+          'ct': 'CT 검사',
+          'pet-ct': 'PET-CT 검사',
+          'ultrasound': '초음파 검사',
+          'xray': 'X-ray 검사',
+          'mammography': '유방촬영술',
+          'bone-density': '골밀도 검사',
+          'comprehensive': '종합건강검진',
+          'brain-checkup': '뇌검진',
+          'heart-checkup': '심장검진',
+          'other': '기타 검사'
+        };
+        
+        const notificationData = {
+          patientName: formData.name,
+          phone: formData.phone,
+          examType: examTypeMap[formData.examType] || formData.examType,
+          preferredDate: formData.preferredDate,
+          preferredTime: formData.preferredTime
+        };
+        
+        console.log('🔔 알림 데이터:', notificationData);
+        console.log('🔔 notifyNewReservation 함수 타입:', typeof notifyNewReservation);
+        
+        try {
+          console.log('🔔 예약 완료! 관리자 알림 전송 시작...');
+          notifyNewReservation(notificationData);
+          console.log('✅ 알림 전송 완료! (로컬 + 탭 간 통신)');
+          console.log('🔄 관리자 페이지 탭에서 알림을 확인하세요!');
+        } catch (error) {
+          console.error('❌ 알림 전송 실패:', error);
+        }
         
         // 폼 초기화
         setFormData({
