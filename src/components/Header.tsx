@@ -10,7 +10,7 @@ const Header = () => {
           {/* 로고 */}
           <div className="flex items-center">
             <img 
-              src="https://cdn.imweb.me/upload/S202505065183c8257f7bc/a43561227cfbc.png" 
+              src="https://cdn.imweb.me/upload/S202505065183c8257f7bc/7db6102bd4418.png" 
               alt="현대영상의학과의원" 
               className="h-12 w-auto object-contain"
             />
