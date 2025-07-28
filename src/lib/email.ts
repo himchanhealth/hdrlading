@@ -108,18 +108,10 @@ ${data.notes || '없음'}
 
     if (result.status === 200) {
       console.log('이메일 전송 성공!');
-      console.log('✅ 예약 처리 완료:', {
-        supabase: supabaseResult.success ? '저장됨' : '실패',
-        email: '전송됨'
-      });
+      console.log('✅ 이메일 전송 완료');
       return true;
     } else {
       console.error('이메일 전송 실패. Status:', result.status);
-      // Supabase에는 저장되었지만 이메일 전송 실패한 경우도 성공으로 처리
-      if (supabaseResult.success) {
-        console.log('⚠️ Supabase 저장은 성공, 이메일 전송만 실패');
-        return true;
-      }
       return false;
     }
   } catch (error) {
