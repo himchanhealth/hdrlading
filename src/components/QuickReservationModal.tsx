@@ -114,9 +114,8 @@ const QuickReservationModal = ({ children }: QuickReservationModalProps) => {
       }
 
       console.log("✅ 예약 신청 성공!");
-      alert("예약 신청이 완료되었습니다. 곧 연락드리겠습니다.");
         
-        // 관리자에게 알림 전송
+        // 관리자에게 알림 전송 (alert 전에 실행)
         console.log('🔔 예약 성공! 알림 전송 시작...');
         const examTypeMap: { [key: string]: string } = {
           'mri': 'MRI 검사',
@@ -151,6 +150,9 @@ const QuickReservationModal = ({ children }: QuickReservationModalProps) => {
         } catch (error) {
           console.error('❌ 알림 전송 실패:', error);
         }
+
+        // 사용자에게 완료 메시지 표시 (알림 전송 후)
+        alert("예약 신청이 완료되었습니다. 곧 연락드리겠습니다.");
         
         // 폼 초기화
         setFormData({
