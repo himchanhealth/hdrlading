@@ -53,36 +53,48 @@ const ReservationNotification = ({
   // 새로운 알림이 오면 알림창 표시
   useEffect(() => {
     console.log('🔔 ReservationNotification - 알림 변경됨:', notifications.length, '개');
-    console.log('🔄 탭 간 통신으로 받은 알림도 포함됨');
+    console.log('🔔 현재 알림 목록:', notifications.map(n => ({ id: n.id, timestamp: n.timestamp, isRead: n.isRead })));
+    
     const now = new Date();
-    const recentThreshold = 10 * 1000; // 10초 이내의 알림만 알림창으로 표시
+    const recentThreshold = 60 * 1000; // 60초로 증가 (1분 이내의 알림)
     
-    // 읽지 않은 알림 중에서 최근 10초 이내에 생성된 것들만 필터링
-    const recentNotifications = notifications.filter(n => 
-      !n.isRead && 
-      (now.getTime() - new Date(n.timestamp).getTime()) < recentThreshold &&
-      !shownToastsRef.current.has(n.id) // 이미 표시된 알림이 아닌 것
-    );
+    // 읽지 않은 알림 중에서 최근 1분 이내에 생성된 것들만 필터링
+    const recentNotifications = notifications.filter(n => {
+      const notificationTime = new Date(n.timestamp);
+      const timeDiff = now.getTime() - notificationTime.getTime();
+      const isRecent = timeDiff < recentThreshold;
+      const isUnread = !n.isRead;
+      const notShownYet = !shownToastsRef.current.has(n.id);
+      
+      console.log(`🔔 알림 ${n.id}: 시간차이=${timeDiff}ms, 최근=${isRecent}, 미읽음=${isUnread}, 미표시=${notShownYet}`);
+      
+      return isUnread && isRecent && notShownYet;
+    });
     
-    console.log('🔔 최근 알림:', recentNotifications.length, '개');
-    console.log('🔔 이미 표시된 알림:', shownToastsRef.current.size, '개');
+    console.log('🔔 표시할 최근 알림:', recentNotifications.length, '개');
+    console.log('🔔 이미 표시된 알림 ID들:', Array.from(shownToastsRef.current));
     
     if (recentNotifications.length > 0) {
-      // 가장 최근 알림을 표시
-      const newest = recentNotifications[recentNotifications.length - 1];
+      // 가장 최근 알림을 표시 (배열의 첫 번째가 가장 최근)
+      const newest = recentNotifications[0];
       console.log('🔔 새로운 알림창 표시:', newest);
       
       // 이미 표시된 알림으로 기록
-      recentNotifications.forEach(n => shownToastsRef.current.add(n.id));
+      recentNotifications.forEach(n => {
+        shownToastsRef.current.add(n.id);
+        console.log('🔔 알림 ID 추가됨:', n.id);
+      });
       
       setLatestNotification(newest);
       setShowNewNotificationAlert(true);
-      // setIsExpanded(true); // 알림 드롭다운 자동 열기 제거
       
-      // 5초 후 자동으로 알림창 닫기
+      // 8초 후 자동으로 알림창 닫기 (시간 연장)
       setTimeout(() => {
+        console.log('🔔 알림창 자동 닫기');
         setShowNewNotificationAlert(false);
-      }, 5000);
+      }, 8000);
+    } else {
+      console.log('🔔 표시할 새로운 알림이 없음');
     }
   }, [notifications]);
 

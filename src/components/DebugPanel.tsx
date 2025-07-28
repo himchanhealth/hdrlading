@@ -137,9 +137,20 @@ const DebugPanel = () => {
           {/* 알림 상태 */}
           <div className="space-y-1">
             <h4 className="text-xs font-semibold text-gray-700">알림 상태</h4>
-            <Badge variant="outline">
-              현재 알림: {notifications.length}개
-            </Badge>
+            <div className="grid grid-cols-2 gap-1">
+              <Badge variant="outline">
+                전체: {notifications.length}개
+              </Badge>
+              <Badge variant="destructive">
+                미읽음: {notifications.filter(n => !n.isRead).length}개
+              </Badge>
+            </div>
+            <div className="text-xs text-gray-500">
+              최근 알림: {notifications.length > 0 ? 
+                new Date(notifications[0].timestamp).toLocaleTimeString() : 
+                '없음'
+              }
+            </div>
           </div>
 
           {/* 테스트 버튼들 */}

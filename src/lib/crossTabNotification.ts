@@ -113,7 +113,7 @@ export const subscribeToCrossTabNotifications = (
       try {
         const notifications = JSON.parse(event.newValue) as CrossTabNotificationData[];
         const recentNotifications = notifications.filter(n => 
-          new Date().getTime() - new Date(n.timestamp).getTime() < 30000 // 30초 이내
+          new Date().getTime() - new Date(n.timestamp).getTime() < 60000 // 60초 이내로 증가
         );
         
         recentNotifications.forEach(notification => {
@@ -140,7 +140,7 @@ export const subscribeToCrossTabNotifications = (
       if (storedData) {
         const notifications = JSON.parse(storedData) as CrossTabNotificationData[];
         const recentNotifications = notifications.filter(n => 
-          new Date().getTime() - new Date(n.timestamp).getTime() < 30000 // 30초 이내
+          new Date().getTime() - new Date(n.timestamp).getTime() < 60000 // 60초 이내로 증가
         );
         
         recentNotifications.forEach(notification => {
