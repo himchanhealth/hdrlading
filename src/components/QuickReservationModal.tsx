@@ -8,6 +8,7 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { Calendar, Phone, User, Clock, FileText, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { sendReservationEmail, type ReservationData } from "@/lib/email";
+import { saveReservation } from "@/lib/supabase";
 import { format } from "date-fns";
 import { useNotificationContext } from "@/contexts/NotificationContext";
 
@@ -70,14 +71,43 @@ const QuickReservationModal = ({ children }: QuickReservationModalProps) => {
     setIsSubmitting(true);
     
     try {
-      console.log("전송할 데이터:", formData);
+      console.log("🔍 전송할 데이터:", formData);
       
-      // 이메일 전송
+      // 1. Supabase에 예약 데이터 저장
+      console.log("🔍 Supabase에 예약 데이터 저장 시작...");
+      const supabaseResult = await saveReservation({
+        patient_name: formData.name,
+        patient_phone: formData.phone,
+        patient_birth_date: formData.birthDate,
+        patient_gender: formData.gender as 'male' | 'female',
+        exam_type: formData.examType,
+        preferred_date: formData.preferredDate,
+        preferred_time: formData.preferredTime,
+        notes: formData.notes
+      });
+
+      console.log("🔍 Supabase 저장 결과:", supabaseResult);
+
+      if (!supabaseResult.success) {
+        console.error("❌ Supabase 저장 실패:", supabaseResult.error);
+        alert(`예약 저장에 실패했습니다: ${supabaseResult.error}\n\n직접 연락주세요:\n📞 063-272-3323`);
+        return;
+      }
+
+      console.log("✅ Supabase에 예약 데이터 저장 성공!");
+      
+      // 2. 이메일 전송 (선택사항)
+      console.log("🔍 이메일 전송 시작...");
       const emailSent = await sendReservationEmail(formData as ReservationData);
       
       if (emailSent) {
-        console.log("예약 신청 성공!");
-        alert("예약 신청이 완료되었습니다. 곧 연락드리겠습니다.");
+        console.log("✅ 이메일 전송 성공!");
+      } else {
+        console.warn("⚠️ 이메일 전송 실패 (예약은 저장됨)");
+      }
+
+      console.log("✅ 예약 신청 성공!");
+      alert("예약 신청이 완료되었습니다. 곧 연락드리겠습니다.");
         
         // 관리자에게 알림 전송
         console.log('🔔 예약 성공! 알림 전송 시작...');
@@ -131,10 +161,6 @@ const QuickReservationModal = ({ children }: QuickReservationModalProps) => {
         
         // 모달 닫기
         setIsDialogOpen(false);
-      } else {
-        console.error("이메일 전송 실패");
-        alert("예약 신청 중 오류가 발생했습니다.\n\n직접 연락주세요:\n📞 063-272-3323");
-      }
     } catch (error) {
       console.error("예약 신청 처리 중 오류:", error);
       alert("예약 신청 중 오류가 발생했습니다.\n\n직접 연락주세요:\n📞 063-272-3323");

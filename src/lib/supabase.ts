@@ -56,7 +56,12 @@ export interface BoardPostData {
 // 예약 데이터 저장 함수
 export const saveReservation = async (data: Omit<ReservationData, 'id' | 'created_at' | 'updated_at'>): Promise<{ success: boolean; data?: ReservationData; error?: string }> => {
   try {
-    console.log('Supabase에 예약 데이터 저장 중...', data);
+    console.log('🔍 Supabase 연결 정보:');
+    console.log('- URL:', supabaseUrl);
+    console.log('- API Key 앞 20자:', supabaseAnonKey.substring(0, 20) + '...');
+    console.log('- 환경변수 VITE_SUPABASE_URL:', import.meta.env.VITE_SUPABASE_URL ? '설정됨' : '설정안됨');
+    console.log('- 환경변수 VITE_SUPABASE_ANON_KEY:', import.meta.env.VITE_SUPABASE_ANON_KEY ? '설정됨' : '설정안됨');
+    console.log('🔍 Supabase에 예약 데이터 저장 중...', data);
 
     // 빈 문자열을 null로 변환
     const processedData = {
@@ -68,16 +73,20 @@ export const saveReservation = async (data: Omit<ReservationData, 'id' | 'create
       notes: data.notes || null
     };
 
+    console.log('🔍 처리된 데이터:', processedData);
+
+    const insertData = {
+      ...processedData,
+      status: 'pending',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    console.log('🔍 최종 insert 데이터:', insertData);
+
     const { data: reservation, error } = await supabase
       .from('reservations')
-      .insert([
-        {
-          ...processedData,
-          status: 'pending',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }
-      ])
+      .insert([insertData])
       .select()
       .single();
 
