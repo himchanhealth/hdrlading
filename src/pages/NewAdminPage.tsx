@@ -16,6 +16,7 @@ import ContactInfoManagement from '@/components/admin/ContactInfoManagement';
 import ReservationNotification from '@/components/admin/ReservationNotification';
 import { useNotificationContext } from '@/contexts/NotificationContext';
 import { requestNotificationPermission } from '@/contexts/NotificationContext';
+import DebugPanel from '@/components/DebugPanel';
 import { 
   Calendar, 
   Phone, 
@@ -712,6 +713,9 @@ const NewAdminPage = () => {
         patientName={patientDetailModal.patientName}
         patientPhone={patientDetailModal.patientPhone}
       />
+
+      {/* 디버그 패널 (URL에 ?debug=true가 있을 때만 표시) */}
+      {new URLSearchParams(window.location.search).get('debug') === 'true' && <DebugPanel />}
     </div>
   );
 };
