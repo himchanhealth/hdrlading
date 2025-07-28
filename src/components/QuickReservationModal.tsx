@@ -60,7 +60,13 @@ const QuickReservationModal = ({ children }: QuickReservationModalProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("예약 신청 시작...");
+    console.log("🔍 예약 신청 시작...");
+    
+    // 이미 제출 중이면 중복 제출 방지
+    if (isSubmitting) {
+      console.log("⚠️ 이미 제출 중입니다. 중복 제출 방지됨");
+      return;
+    }
     
     // 필수 필드 유효성 검사
     if (!formData.name || !formData.phone || !formData.birthDate || !formData.gender || !formData.examType || !formData.preferredDate || !formData.preferredTime) {
@@ -69,6 +75,7 @@ const QuickReservationModal = ({ children }: QuickReservationModalProps) => {
     }
     
     setIsSubmitting(true);
+    console.log("🔍 제출 상태를 true로 변경");
     
     try {
       console.log("🔍 전송할 데이터:", formData);

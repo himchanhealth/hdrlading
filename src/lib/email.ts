@@ -1,5 +1,4 @@
 import emailjs from '@emailjs/browser';
-import { saveReservation } from './supabase';
 
 // EmailJS 설정값들 (하드코딩으로 임시 해결)
 const SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_re7tcvj';
@@ -36,35 +35,13 @@ export interface ReservationData {
   notes: string;
 }
 
-// 예약 처리 함수 (Supabase 저장 + 이메일 전송)
+// 예약 이메일 전송 함수 (이메일만 전송)
 export const sendReservationEmail = async (data: ReservationData): Promise<boolean> => {
   try {
-    console.log('예약 처리 시작...');
-    console.log('예약 데이터:', data);
+    console.log('🔍 이메일 전송 시작...');
+    console.log('🔍 이메일 전송 데이터:', data);
 
-    // 1. Supabase에 예약 데이터 저장
-    console.log('Supabase에 데이터 저장 중...');
-    const supabaseResult = await saveReservation({
-      patient_name: data.name,
-      patient_phone: data.phone,
-      patient_birth_date: data.birthDate,
-      patient_gender: data.gender as 'male' | 'female',
-      exam_type: data.examType,
-      preferred_date: data.preferredDate,
-      preferred_time: data.preferredTime,
-      notes: data.notes || ''
-    });
-
-    if (!supabaseResult.success) {
-      console.error('Supabase 저장 실패:', supabaseResult.error);
-      // Supabase 저장에 실패해도 이메일은 시도
-    } else {
-      console.log('Supabase 저장 성공:', supabaseResult.data);
-    }
-
-    // 2. EmailJS로 이메일 전송
-    console.log('이메일 전송 시작...');
-    console.log('EmailJS 설정 값:', {
+    console.log('🔍 EmailJS 설정 값:', {
       SERVICE_ID,
       TEMPLATE_ID,
       PUBLIC_KEY: PUBLIC_KEY ? 'SET' : 'NOT_SET'
